@@ -1,0 +1,3 @@
+# Optional real-time camera and tracking dependencies for phase 3.
+mediapipe==0.10.35
+opencv-contrib-python==4.13.0.92

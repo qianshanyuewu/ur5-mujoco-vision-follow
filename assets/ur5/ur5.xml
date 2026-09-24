@@ -1,0 +1,100 @@
+<mujoco model="UR5">
+  <compiler angle="radian" autolimits="true" meshdir="meshes" balanceinertia="true"/>
+  <option timestep="0.002" integrator="implicitfast" gravity="0 0 -9.81" cone="elliptic"/>
+  <size njmax="2000" nconmax="400"/>
+
+  <default>
+    <joint limited="true" armature="0.01" damping="0.25"/>
+    <geom condim="3" friction="1 0.005 0.0001" density="1000"/>
+  </default>
+
+  <asset>
+    <mesh name="base_mesh" file="base.stl"/>
+    <mesh name="shoulder_mesh" file="shoulder.stl"/>
+    <mesh name="upperarm_mesh" file="upperarm.stl"/>
+    <mesh name="forearm_mesh" file="forearm.stl"/>
+    <mesh name="wrist1_mesh" file="wrist1.stl"/>
+    <mesh name="wrist2_mesh" file="wrist2.stl"/>
+    <mesh name="wrist3_mesh" file="wrist3.stl"/>
+    <texture name="floor_grid" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.22 0.24 0.27" rgb2="0.28 0.30 0.33"/>
+    <material name="floor_material" texture="floor_grid" texrepeat="5 5" reflectance="0.08"/>
+  </asset>
+
+  <worldbody>
+    <light name="key_light" pos="1.5 -1.5 2.5" dir="-0.5 0.5 -1" diffuse="0.8 0.8 0.8"/>
+    <geom name="floor" type="plane" pos="0 0 -0.04" size="2 2 0.1" material="floor_material"/>
+
+    <!-- Root frame is UR's ROS base_link frame. The fixed pi rotation below
+         creates base_link_inertia as in the official robot description. -->
+    <body name="base_link">
+      <body name="base_link_inertia" quat="0 0 0 1">
+        <inertial pos="0 0 0" mass="4.0" diaginertia="0.00443333156 0.00443333156 0.0072"/>
+        <geom name="base_visual_collision" type="mesh" mesh="base_mesh" quat="0 0 0 1" rgba="0.08 0.09 0.11 1"/>
+
+        <body name="shoulder_link" pos="0 0 0.089159">
+          <joint name="shoulder_pan_joint" type="hinge" axis="0 0 1" range="-6.283185307 6.283185307"/>
+          <inertial pos="0 -0.00193 -0.02561" mass="3.7" diaginertia="0.01497235833 0.01497235833 0.01040625"/>
+          <geom name="shoulder_visual_collision" type="mesh" mesh="shoulder_mesh" quat="0 0 0 1" rgba="0.10 0.37 0.57 1"/>
+
+          <body name="upper_arm_link" quat="0.707106781 0.707106781 0 0">
+            <joint name="shoulder_lift_joint" type="hinge" axis="0 0 1" range="-6.283185307 6.283185307"/>
+            <inertial pos="-0.2125 0 0.11336" mass="8.393" diaginertia="0.0151074 0.1338858354 0.1338858354"/>
+            <geom name="upper_arm_visual_collision" type="mesh" mesh="upperarm_mesh"
+                  pos="0 0 0.13585" quat="0.5 0.5 -0.5 -0.5" rgba="0.10 0.37 0.57 1"/>
+
+            <body name="forearm_link" pos="-0.425 0 0">
+              <joint name="elbow_joint" type="hinge" axis="0 0 1" range="-3.141592654 3.141592654"/>
+              <inertial pos="-0.24225 0 0.0265" mass="2.33" diaginertia="0.004095 0.03121680352 0.03121680352"/>
+              <geom name="forearm_visual_collision" type="mesh" mesh="forearm_mesh"
+                    pos="0 0 0.0165" quat="0.5 0.5 -0.5 -0.5" rgba="0.10 0.37 0.57 1"/>
+
+              <body name="wrist_1_link" pos="-0.39225 0 0.10915">
+                <joint name="wrist_1_joint" type="hinge" axis="0 0 1" range="-6.283185307 6.283185307"/>
+                <inertial pos="0 -0.01634 -0.0018" mass="1.219" diaginertia="0.00201388958 0.00201388958 0.0021942"/>
+                <geom name="wrist_1_visual_collision" type="mesh" mesh="wrist1_mesh"
+                      pos="0 0 -0.093" quat="0.707106781 0.707106781 0 0" rgba="0.08 0.09 0.11 1"/>
+
+                <body name="wrist_2_link" pos="0 -0.09465 0" quat="0.707106781 0.707106781 0 0">
+                  <joint name="wrist_2_joint" type="hinge" axis="0 0 1" range="-6.283185307 6.283185307"/>
+                  <inertial pos="0 0.01634 -0.0018" mass="1.219" diaginertia="0.00183103958 0.00183103958 0.0021942"/>
+                  <geom name="wrist_2_visual_collision" type="mesh" mesh="wrist2_mesh"
+                        pos="0 0 -0.095" rgba="0.08 0.09 0.11 1"/>
+
+                  <body name="wrist_3_link" pos="0 0.0823 0" quat="0.707106781 -0.707106781 0 0">
+                    <joint name="wrist_3_joint" type="hinge" axis="0 0 1" range="-6.283185307 6.283185307"/>
+                    <inertial pos="0 0 -0.001159" mass="0.1879" diaginertia="0.00008062476 0.00008062476 0.0001321172"/>
+                    <geom name="wrist_3_visual_collision" type="mesh" mesh="wrist3_mesh"
+                          pos="0 0 -0.0818" quat="0.707106781 0.707106781 0 0" rgba="0.08 0.09 0.11 1"/>
+                    <!-- Flange origin is coincident with wrist_3_link in UR's URDF. -->
+                    <site name="tcp" pos="0 0 0" quat="0.5 -0.5 -0.5 -0.5" size="0.012" rgba="0.95 0.18 0.12 1"/>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <body name="target_marker" mocap="true" pos="0 0 0.3">
+      <geom name="target_marker_geom" type="sphere" size="0.008" rgba="0.2 0.75 0.95 0.85" contype="0" conaffinity="0"/>
+    </body>
+    <body name="object_marker" mocap="true" pos="0 0 -10">
+      <geom name="object_marker_geom" type="sphere" size="0.025" rgba="0.98 0.72 0.12 0.95" contype="0" conaffinity="0"/>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="shoulder_pan_servo" joint="shoulder_pan_joint" kp="100" kv="20" forcelimited="true" forcerange="-150 150" ctrlrange="-6.283185307 6.283185307" ctrllimited="true"/>
+    <position name="shoulder_lift_servo" joint="shoulder_lift_joint" kp="100" kv="20" forcelimited="true" forcerange="-150 150" ctrlrange="-6.283185307 6.283185307" ctrllimited="true"/>
+    <position name="elbow_servo" joint="elbow_joint" kp="100" kv="20" forcelimited="true" forcerange="-150 150" ctrlrange="-3.141592654 3.141592654" ctrllimited="true"/>
+    <position name="wrist_1_servo" joint="wrist_1_joint" kp="60" kv="12" forcelimited="true" forcerange="-28 28" ctrlrange="-6.283185307 6.283185307" ctrllimited="true"/>
+    <position name="wrist_2_servo" joint="wrist_2_joint" kp="60" kv="12" forcelimited="true" forcerange="-28 28" ctrlrange="-6.283185307 6.283185307" ctrllimited="true"/>
+    <position name="wrist_3_servo" joint="wrist_3_joint" kp="40" kv="8" forcelimited="true" forcerange="-28 28" ctrlrange="-6.283185307 6.283185307" ctrllimited="true"/>
+  </actuator>
+
+  <keyframe>
+    <key name="home" qpos="-1.811664 -1.407528 1.714162 2.834958 -1.329929 0" ctrl="-1.811664 -1.407528 1.714162 2.834958 -1.329929 0"/>
+  </keyframe>
+</mujoco>
